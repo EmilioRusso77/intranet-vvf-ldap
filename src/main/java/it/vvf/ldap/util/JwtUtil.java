@@ -1,5 +1,6 @@
 package it.vvf.ldap.util;
 
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,18 +21,44 @@ public class JwtUtil {
 	@Value("${jwt.expiration}")
 	private long expirationTime;
 
+	@Value("${jwt.signingKeyBase64}")
+	private String signingKeyBase64;
+
+	
+	@Value("${jwt.encryptionKeyBase64}")
+	private String encryptionKeyBase64;
+
+
 	private SecretKey signingKey;
 	private SecretKey encryptionKeySpec;
 
 	@PostConstruct
 	public void init() {
+		/*
+		// Generazione chiave di firma (HMAC-SHA256) salvate nell'application.properties
+		Key signingKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+		String signingKeyBase64 = Base64.getEncoder().encodeToString(signingKey.getEncoded());
+		System.err.println(signingKeyBase64);
+		// Generazione chiave di cifratura (AES-256-GCM) salvate nell'application.properties
+		byte[] encryptionKeyBytes = new byte[32]; // 32 byte = 256 bit
+		new SecureRandom().nextBytes(encryptionKeyBytes);
+		String encryptionKeyBase64 = Base64.getEncoder().encodeToString(encryptionKeyBytes);
+		System.err.println(encryptionKeyBase64);
+		*/
 		
-		// Inizializza la chiave di firma (HMAC-SHA256)
-		this.signingKey = Jwts.SIG.HS256.key().build();
-		
-		// Inizializza la chiave di cifratura (AES-256-GCM)
-		byte[] keyBytes = new byte[32]; // 256 bit
-		this.encryptionKeySpec = new SecretKeySpec(keyBytes, "AES"); // Crea una chiave AES-256
+	    // Inizializza la chiave di firma (HMAC-SHA256)
+	    byte[] signingKeyBytes = Base64.getDecoder().decode(signingKeyBase64);
+	    if (signingKeyBytes.length < 32) { // 32 byte = 256 bit
+	        throw new IllegalArgumentException("Signing key is too short for HMAC-SHA256. It should be at least 256 bits.");
+	    }
+	    this.signingKey = new SecretKeySpec(signingKeyBytes, "HmacSHA256");
+
+	    // Inizializza la chiave di cifratura (AES-256-GCM)
+	    byte[] encryptionKeyBytes = Base64.getDecoder().decode(encryptionKeyBase64);
+	    if (encryptionKeyBytes.length != 32) { // 32 byte = 256 bit
+	        throw new IllegalArgumentException("Encryption key must be 256 bits (32 bytes) long for AES-256-GCM.");
+	    }
+	    this.encryptionKeySpec = new SecretKeySpec(encryptionKeyBytes, "AES");
 	}
 
 	// Metodo per generare il token firmato e cifrato

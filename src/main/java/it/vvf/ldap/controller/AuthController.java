@@ -1,6 +1,5 @@
 package it.vvf.ldap.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,14 +27,19 @@ import it.vvf.ldap.util.LoginRequest;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-	@Autowired
-    AuthenticationManager authenticationManager;
-
-    @Autowired
-    private CustomUserDetailsService customUserDetailsService;
     
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtUtil jwtUtil;
+
+    
+    public AuthController(AuthenticationManager authenticationManager,CustomUserDetailsService customUserDetailsService,JwtUtil jwtUtil) {
+    
+        this.authenticationManager = authenticationManager;
+        this.customUserDetailsService = customUserDetailsService;
+        this.jwtUtil = jwtUtil;
+        
+    }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	@PostMapping("/generatetoken")
