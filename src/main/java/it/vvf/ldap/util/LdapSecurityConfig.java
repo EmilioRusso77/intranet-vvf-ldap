@@ -62,7 +62,9 @@ public class LdapSecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(authz -> authz.requestMatchers("/api/auth/**").permitAll()
+                .authorizeHttpRequests(authz -> authz
+                		.requestMatchers("/api/users/**").permitAll()
+                		.requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
