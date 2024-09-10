@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.vvf.ldap.dto.UserRoleDto;
 import it.vvf.ldap.service.CustomUserDetailsService;
+import it.vvf.ldap.service.UserRoleService;
 import it.vvf.ldap.util.ApiResponse;
 import it.vvf.ldap.util.JwtAuthenticationResponse;
 import it.vvf.ldap.util.JwtUtil;
@@ -31,13 +33,14 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
-
+    private final UserRoleService userRoleService;
     
-    public AuthController(AuthenticationManager authenticationManager,CustomUserDetailsService customUserDetailsService,JwtUtil jwtUtil) {
+    public AuthController(AuthenticationManager authenticationManager,CustomUserDetailsService customUserDetailsService,JwtUtil jwtUtil,UserRoleService userRoleService) {
     
         this.authenticationManager = authenticationManager;
         this.customUserDetailsService = customUserDetailsService;
         this.jwtUtil = jwtUtil;
+        this.userRoleService = userRoleService;
         
     }
 
@@ -51,7 +54,8 @@ public class AuthController {
     	}
     	
 		 UserDetails userDetails=customUserDetailsService.loadUserByUsername(loginRequest.getUsername());
-		 String jwt=jwtUtil.generateToken(userDetails);
+		 UserRoleDto userRole = userRoleService.loadUserByUsername(userDetails.getUsername());
+		 String jwt=jwtUtil.generateToken(userRole);
         return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
     }
     

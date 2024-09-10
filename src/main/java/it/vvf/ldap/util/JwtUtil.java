@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Jwts;
+import it.vvf.ldap.dto.UserRoleDto;
 import jakarta.annotation.PostConstruct;
 
 @Component
@@ -62,17 +63,19 @@ public class JwtUtil {
 	}
 
 	// Metodo per generare il token firmato e cifrato
-	public String generateToken(UserDetails userDetails) {
+	public String generateToken(UserRoleDto userRoleDto) {
 		Map<String, Object> claims = new HashMap<>();
-		claims.put("username", userDetails.getUsername());
-		return createToken(claims, userDetails.getUsername());
+		claims.put("username", userRoleDto.getUsername());
+		claims.put("role", userRoleDto.getRole());
+		claims.put("sections", userRoleDto.getSections());
+		return createToken(claims, userRoleDto.getUsername());
 	}
 
 	private String createToken(Map<String, Object> claims, String subject) {
 		try {
 			String signedToken = Jwts.builder().claims(claims).subject(subject).issuedAt(new Date())
 					.expiration(new Date(System.currentTimeMillis() + expirationTime)).signWith(signingKey).compact();
-
+           //return signedToken;	
 			return Jwts.builder().content(signedToken).encryptWith(encryptionKeySpec, Jwts.ENC.A256GCM).compact();
 		} catch (Exception e) {
 			throw new RuntimeException("Errore nella generazione del token JWT: " + e.getMessage(), e);
