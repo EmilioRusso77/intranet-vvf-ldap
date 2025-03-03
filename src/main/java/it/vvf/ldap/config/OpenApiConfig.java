@@ -12,7 +12,7 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("API di Gestione Ruoli Utente")
+                        .title("API di Gestione Ruoli-Sections Utente")
                         .version("1.0")
                         .description("API per la gestione dei ruoli utente e delle sezioni nell'intranet VVF"));
     }

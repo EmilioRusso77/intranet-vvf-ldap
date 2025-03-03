@@ -1,5 +1,7 @@
 package it.vvf.ldap.controller;
 
+import javax.management.RuntimeErrorException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import it.vvf.ldap.dto.UserRoleDto;
 import it.vvf.ldap.service.CustomUserDetailsService;
 import it.vvf.ldap.service.UserRoleService;
@@ -27,6 +30,7 @@ import it.vvf.ldap.util.LoginRequest;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/api/auth")
+@Tag(name = "Auth Management", description = "API per la gestione del login su Ldap Nazionale")
 public class AuthController {
 
     
@@ -60,7 +64,7 @@ public class AuthController {
     }
     
     
-    private void authenticate(String username, String password) throws Exception {
+    private void authenticate(String username, String password) {
 		try {
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 		} catch (DisabledException e) {
@@ -69,6 +73,10 @@ public class AuthController {
 			throw new BadCredentialsException(LDAPConstants.INVALID_CREDENTIALS, e);
 		}catch (LockedException e) {
 			throw new LockedException(LDAPConstants.LOCKED_CREDENTIALS, e);
+		}
+		catch (RuntimeErrorException e) {
+			Error error = new Error(LDAPConstants.INTERNAL_SERVER_ERROR	);
+			throw new RuntimeErrorException(error, e.getMessage());
 		}
 	}
 }
